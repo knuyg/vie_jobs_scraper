@@ -79,13 +79,22 @@ async fn fetch_jobs(client: &Client, skip: u32) -> Result<ApiResponse, reqwest::
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::new();
+    let mut all_jobs: Vec<VieJob> = Vec::new();
 
-    // Test with just the first page
-    let response = fetch_jobs(&client, 0).await?;
+    // We need to get the total number of jobs to fetch from the API response
+    let first_response = fetch_jobs(&client, 0).await?;
+    all_jobs.extend(first_response.result); // extend() *moves* response.result into all_jobs, i.e. the ownership is transferred to all_jobs
+    let jobs_count = first_response.count;
 
-    println!("Total jobs available: {}", response.count);
-    println!("Jobs fetched this page: {}", response.result.len());
-    println!("First job: {:#?}", response.result[0]);
+    let mut skip: u32 = 100; // could've written "skip = 100u32;"
+
+    while skip < jobs_count {
+        let api_response = fetch_jobs(&client, skip).await?;
+        all_jobs.extend(api_response.result);
+        skip += 100;
+    }
+    
+    println!("Total jobs fetched: {}", all_jobs.len());
 
     Ok(())
 }
