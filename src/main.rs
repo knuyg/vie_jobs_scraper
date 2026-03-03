@@ -3,7 +3,7 @@ use reqwest::Client;
 
 // API Request Body
 #[derive(Serialize)]
-struct SearchRequest {
+struct ApiRequestBody {
     limit: u32,
     skip: u32,
     sort: Vec<String>,
@@ -25,15 +25,25 @@ struct SearchRequest {
 #[serde(rename_all = "camelCase")]
 struct VieJob {
     id: u32,
-    mission_title: String,
     organization_name: String,
-    city_name: String,
-    country_name_en: String,
-    mission_type: String,
+    mission_title: String,
     mission_duration: u32,
-    indemnite: Option<f64>,
+    mission_type: String,
+    organization_presentation: String,
+    view_counter: u32,
+    candidate_counter: u32,
+    city_name: String,
+    creation_date: Option<String>,
     mission_start_date: Option<String>,
+    mission_end_date: Option<String>,
+    start_broadcast_date: Option<String>,
+    duration_broadcast: f64,
+    end_broadcast_date: Option<String>,
+    mission_description: String,
+    country_name_en: String,
     reference: String,
+    contact_name: Option<String>,
+    indemnite: Option<f64>,
     teleworking_available: bool,
     contact_email: String,
 }
@@ -47,7 +57,7 @@ struct ApiResponse {
 // function that fetches one page of results from the API
 // async because we will run this function several times at the same time
 async fn fetch_jobs(client: &Client, skip: u32) -> Result<ApiResponse, reqwest::Error>{
-    let request_body = SearchRequest {
+    let request_body = ApiRequestBody {
         limit: 100,
         skip,
         sort: vec![String::from("0")],
@@ -96,5 +106,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     println!("Total jobs fetched: {}", all_jobs.len());
 
+    println!("First job fetched: {:#?}", all_jobs.get(0));
     Ok(())
 }
