@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use reqwest::Client;
+use std::fs;
 
 // API Request Body
 #[derive(Serialize)]
@@ -21,7 +22,7 @@ struct ApiRequestBody {
 }
 
 // API Response Structure
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct VieJob {
     id: u32,
@@ -106,6 +107,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     println!("Total jobs fetched: {}", all_jobs.len());
 
-    println!("First job fetched: {:#?}", all_jobs.get(0));
+    // println!("First job fetched: {:#?}", all_jobs.get(0));
+
+    let json_output = serde_json::to_string_pretty(&all_jobs)?;
+    fs::write("exports/jobs.json", json_output)?; // '?' b/c file writing can fail
+    println!("Saved to jobs.json!");
+
     Ok(())
 }
